@@ -1,8 +1,16 @@
 const fs = require('fs');
 const path = require('path');
-const db = require('../config/database');
+const sqlite3 = require('sqlite3').verbose();
 
 const seedDatabase = async (req, res) => {
+  const dbPath = path.join(__dirname, '../database/mini_erp.db');
+  const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+      console.error('❌ Database error:', err.message);
+      return res.status(500).json({ success: false, message: 'Database connection failed', error: err.message });
+    }
+  });
+
   try {
     // Read schema
     const schemaPath = path.join(__dirname, '../database/schema-sqlite.sql');
@@ -19,7 +27,12 @@ const seedDatabase = async (req, res) => {
       .filter(stmt => stmt.length > 0);
 
     for (const stmt of schemaStatements) {
-      await db.query(stmt);
+      await new Promise((resolve, reject) => {
+        db.run(stmt, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
     }
 
     console.log('✅ Schema initialized successfully');
@@ -31,10 +44,17 @@ const seedDatabase = async (req, res) => {
       .filter(stmt => stmt.length > 0);
 
     for (const stmt of seedStatements) {
-      await db.query(stmt);
+      await new Promise((resolve, reject) => {
+        db.run(stmt, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
     }
 
     console.log('✅ Database seeded successfully');
+
+    db.close();
 
     return res.json({
       success: true,
@@ -43,6 +63,7 @@ const seedDatabase = async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Seed error:', error.message);
+    db.close();
     return res.status(500).json({
       success: false,
       message: 'Failed to seed database',

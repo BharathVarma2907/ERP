@@ -16,6 +16,7 @@ const financeDashboardRoutes = require('./routes/financeDashboardRoutes');
 const aiInsightsRoutes = require('./routes/aiInsightsRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const seedRoutes = require('./routes/seedRoutes');
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use('/api/finance-dashboard', financeDashboardRoutes);
 app.use('/api/ai-insights', aiInsightsRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/seed', seedRoutes);
 
 // Error handling
 app.use(notFound);
